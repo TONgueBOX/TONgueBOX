@@ -72,7 +72,7 @@ export default function JoinLobbyModal({
             </button>
           </div>
         </div>
-  <input
+        <input
           ref={hiddenInputRef}
           autoFocus
           inputMode="numeric"

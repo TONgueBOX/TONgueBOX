@@ -1,9 +1,9 @@
 "use client";
 
-import WeightedSpinner from "@/src/components/WeightedSpinner";
+import WeightedSpinner from "@/src/components/weightedSpinner";
 import { Player } from "@/src/types";
 import { useTelegramWebApp } from "@/src/hooks/useTelegramWebApp";
-import { useRouter } from "next/navigation";
+import BackButton from "@/src/components/backButton";
 
 // Temporary mock data; replace with backend fetch later
 const mockPlayers: Player[] = [
@@ -19,7 +19,6 @@ export default function GamePage() {
   const displayName = user?.username
     ? `@${user.username}`
     : user?.first_name || "Guest";
-  const router = useRouter();
 
   return (
     <div className="relative min-h-screen w-full text-white overflow-hidden">
@@ -29,12 +28,7 @@ export default function GamePage() {
       <div className="pointer-events-none absolute -right-40 -bottom-40 h-96 w-96 rounded-full bg-blue-600/30 blur-3xl" />
 
       <header className="relative z-10 w-full flex items-center justify-between px-6 py-4 backdrop-blur-sm bg-white/5 border-b border-white/10 shadow-lg">
-        <button
-          onClick={() => router.push("/")}
-          className="text-xs tracking-wide px-3 py-1 rounded-md bg-white/10 hover:bg-white/20 transition border border-white/10"
-        >
-          ← Back
-        </button>
+        <BackButton to="/" />
         <h1 className="text-lg font-semibold tracking-wide drop-shadow-[0_0_6px_rgba(255,255,255,0.35)]">
           TONgue
         </h1>

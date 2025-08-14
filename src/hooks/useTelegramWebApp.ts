@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useGlobalLoader } from "@/hooks/useGlobalLoader";
 
 interface TelegramUser {
   id: number;
@@ -77,24 +78,27 @@ export const useTelegramWebApp = () => {
   const [webApp, setWebApp] = useState<TelegramWebApp | null>(null);
   const [user, setUser] = useState<TelegramUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Global loader (provider expected in app layout)
+  const loader = useGlobalLoader();
 
   useEffect(() => {
-    // Добавляем небольшую задержку, чтобы скрипт Telegram успел загрузиться
+    // Add a short delay so the Telegram script has time to load
     const timer = setTimeout(() => {
+      loader?.show("Connecting Telegram...");
       console.log("🔍 Checking Telegram WebApp availability...");
       console.log("window.Telegram:", window.Telegram);
       console.log("window.Telegram?.WebApp:", window.Telegram?.WebApp);
 
-      // Проверяем, что мы в среде Telegram WebApp
+      // Check that we're inside the Telegram WebApp environment
       if (typeof window !== "undefined" && window.Telegram?.WebApp) {
         const tg = window.Telegram.WebApp;
 
         console.log("🚀 Telegram WebApp found! Initializing...");
 
-        // Инициализируем WebApp
+        // Initialize the WebApp
         tg.ready();
 
-        // Расширяем окно на весь экран
+        // Expand viewport to full height
         tg.expand();
 
         setWebApp(tg);
@@ -103,13 +107,13 @@ export const useTelegramWebApp = () => {
         console.log("📊 initData:", tg.initData);
         console.log("📊 initDataUnsafe:", tg.initDataUnsafe);
 
-        // Получаем данные пользователя
+        // Retrieve user data
         if (tg.initDataUnsafe?.user) {
           console.log("✅ Real user data found:", tg.initDataUnsafe.user);
           setUser(tg.initDataUnsafe.user);
         } else {
           console.log("❌ No user data in initDataUnsafe, using mock data");
-          // Если нет данных пользователя в Telegram, все равно используем mock
+          // If Telegram user data is absent, fall back to mock user
           setUser({
             id: 123456789,
             first_name: "Telegram",
@@ -119,8 +123,8 @@ export const useTelegramWebApp = () => {
             is_premium: false
           });
         }
-
         setIsLoading(false);
+        loader.hide();
 
         console.log("Telegram WebApp initialized:", {
           user: tg.initDataUnsafe?.user,
@@ -132,7 +136,7 @@ export const useTelegramWebApp = () => {
         });
       } else {
         console.log("❌ Telegram WebApp not found, using mock data");
-        // Для разработки вне Telegram - создаем mock данные
+        // Outside Telegram (local dev) - provide mock user data
         setUser({
           id: 123456789,
           first_name: "Test",
@@ -142,13 +146,17 @@ export const useTelegramWebApp = () => {
           is_premium: false
         });
         setIsLoading(false);
+        loader.hide();
 
         console.log("Running outside Telegram WebApp - using mock data");
       }
-    }, 100); // Небольшая задержка для загрузки скрипта
+    }, 100); // Small delay to allow script loading
 
-    return () => clearTimeout(timer);
-  }, []);
+    return () => {
+      clearTimeout(timer);
+      loader.hide();
+    };
+  }, [loader]);
 
   return {
     webApp,
